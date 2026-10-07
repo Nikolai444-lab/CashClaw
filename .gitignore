@@ -1,0 +1,30 @@
+# зависимости и сборка
+node_modules/
+dist/
+
+# конфиг и данные приложения (никогда не в репозиторий)
+.cashclaw/
+.env
+.env.local
+
+# секреты и ключи
+Keys.txt
+kwork-api-storage/
+*.token
+*.pem
+*.key
+
+# служебное и постороннее (не часть проекта)
+*.ps1
+*.bat
+*.sql
+*.docx
+*.xlsx
+check-*.mjs
+_brd_test_v3/
+prototypes/
+fill_frm04.py
+
+# прочее
+*.log
+.DS_Store
