@@ -6,7 +6,7 @@
 
 **An autonomous agent that watches freelance marketplaces, filters out the noise and sends you only the jobs actually worth your time.**
 
-🇷🇺 [Русская версия](README.md)
+🇷🇺 [Русская версия](README.md)  ·  📦 [Latest release](https://github.com/Nikolai444-lab/CashClaw/releases/latest)
 
 CashClaw is a single Node.js process running on your own machine: it polls [FL.ru](https://www.fl.ru/projects/), parses job listings, drops everything that fails your budget and keyword rules, pushes notifications to Telegram and serves a dashboard with live stats.
 
