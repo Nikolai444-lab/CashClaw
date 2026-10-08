@@ -15,6 +15,7 @@ CashClaw — это один процесс Node.js, который работа
 ## Возможности
 
 - **Мониторинг FL.ru** — опрос `fl.ru/projects`, разбор карточек через `cheerio`, извлечение бюджета, категории, числа откликов, города, признака файлов.
+- **Два режима сбора — на выбор:** общая лента заказов (по умолчанию) или список конкретных **категорий** FL.ru. Режим задаётся одним полем в конфиге; категорий можно указать сколько угодно — бот обойдёт их все и уберёт дубликаты. Второй режим полезен, когда в общей ленте много мусора: выборка сразу состоит из нужных направлений (например, только «Сайты», «Программирование» и «Мессенджеры»).
 - **Честный разбор бюджета** — диапазоны «30 000 – 50 000 руб», «от 50 000», «до 40 000» и «по договорённости» разбираются корректно (`src/lib/budget.ts`), а не склеиваются в одно число.
 - **Фильтры** — минимальный и максимальный бюджет, ключевые слова (по названию и описанию), стоп-слова.
 - **Telegram-уведомления** — форматированное сообщение о новом заказе с бюджетом и ссылкой; работает даже при заблокированном `api.telegram.org` (сырой TLS-сокет на IP с правильным SNI, плюс поддержка HTTP(S)-прокси).
@@ -68,6 +69,7 @@ node dist/index.js
   },
   "polling": { "intervalMs": 60000, "urgentIntervalMs": 10000 },
   "specialties": ["Веб-разработка", "Парсинг данных"],
+  "categories": ["saity", "programmirovanie", "messengers"],
   "autoQuote": true,
   "autoWork": false,
   "maxConcurrentTasks": 3,
@@ -85,6 +87,26 @@ node dist/index.js
 ```
 
 `botToken` берётся у [@BotFather](https://t.me/BotFather), `chatId` — ID чата или канала, куда присылать уведомления. Поле `proxy` заполняйте только если до `api.telegram.org` нет прямого доступа.
+
+### Два режима сбора заказов
+
+**1. Общая лента** (по умолчанию) — `categories` пустой или не задан. Бот смотрит все свежие заказы FL.ru и отсеивает ненужные фильтрами:
+
+```json
+{ "categories": [] }
+```
+
+**2. По категориям** — перечислите slug'и категорий, и бот будет обходить именно их:
+
+```json
+{ "categories": ["saity", "programmirovanie", "messengers", "avtomatizaciya-biznesa"] }
+```
+
+Список категорий виден в адресах FL.ru: `fl.ru/projects/category/<slug>/`. Доступные slug'и включают, например:
+
+`saity` · `programmirovanie` · `internet-magaziny` · `messengers` · `avtomatizaciya-biznesa` · `ai-iskusstvenniy-intellekt` · `mobile` · `brauzery` · `dizajn` · `prodvizhenie-saitov-seo` · `reklama-marketing` · `teksty` · `audio-video-photo` · `games` · `crypto-i-blockchain` · `inzheniring` · `konsalting` · `marketplace-management` · `socialnye-seti` · `firmennyi-stil` · `3d-grafika` · `animaciya` · `risunki-i-illustracii`
+
+Что выбрать — зависит от того, насколько широкая у вас специализация: при узкой (например, только боты и парсинг) режим категорий даёт заметно меньше мусора в уведомлениях, чем общая лента.
 
 ---
 
@@ -113,6 +135,7 @@ FL.ru  ──HTTP──>  fl/cli.ts ──> фильтры ──> fl-heartbeat 
 | `llm.apiKey` | строка | — | Ключ провайдера |
 | `polling.intervalMs` | число | `60000` | Интервал опроса, мс |
 | `specialties` | массив | `[]` | Специализации агента, влияют на промпт |
+| `categories` | массив | `[]` | Категории FL.ru для сбора (slug из `/projects/category/<slug>/`). Пусто — общая лента |
 | `autoQuote` / `autoWork` | bool | `true` / `true` | Автоматическая оценка и выполнение задач |
 | `declineKeywords` | массив | `[]` | Стоп-слова: такие заказы не берём |
 | `learningEnabled` | bool | `true` | Включить самообучение |

@@ -31,6 +31,11 @@ export interface CashClawConfig {
   polling: PollingConfig;
   pricing: PricingConfig;
   specialties: string[];
+  /**
+   * Категории FL.ru для сбора заказов (slug из /projects/category/<slug>/).
+   * Необязательное поле: пусто/не задано — сбор идёт из общей ленты (режим по умолчанию).
+   */
+  categories?: string[];
   autoQuote: boolean;
   autoWork: boolean;
   maxConcurrentTasks: number;

@@ -15,6 +15,7 @@ CashClaw is a single Node.js process running on your own machine: it polls [FL.r
 ## Features
 
 - **FL.ru monitoring** — polls `fl.ru/projects`, parses listings with `cheerio`, extracts budget, category, response count, city and attachments flag.
+- **Two collection modes, your choice:** the general feed (default) or a list of specific FL.ru **categories**. The mode is set by a single config field; you can list as many categories as you like — all of them are polled and duplicates removed. The category mode helps when the general feed is noisy: the result set already consists of relevant directions (for example, only Sites, Programming and Messengers).
 - **Honest budget parsing** — ranges like `30 000 – 50 000 руб`, `from 50 000`, `up to 40 000` and `negotiable` are parsed correctly (`src/lib/budget.ts`) instead of being glued into one meaningless number.
 - **Filters** — minimum and maximum budget, keywords (title + description) and a decline list.
 - **Telegram notifications** — a formatted message with the job title, budget and link; works even when `api.telegram.org` is blocked (raw TLS socket to a known IP with correct SNI, plus HTTP(S) proxy support).
@@ -68,6 +69,7 @@ The process starts the dashboard on `http://localhost:3777` and performs the fir
   },
   "polling": { "intervalMs": 60000, "urgentIntervalMs": 10000 },
   "specialties": ["Web development", "Data scraping"],
+  "categories": ["saity", "programmirovanie", "messengers"],
   "autoQuote": true,
   "autoWork": false,
   "maxConcurrentTasks": 3,
@@ -85,6 +87,26 @@ The process starts the dashboard on `http://localhost:3777` and performs the fir
 ```
 
 Get `botToken` from [@BotFather](https://t.me/BotFather); `chatId` is the target chat or channel. Fill in `proxy` only if `api.telegram.org` is not reachable directly.
+
+### Two ways to collect jobs
+
+**1. General feed** (default) — `categories` is empty or omitted. The bot watches every fresh FL.ru job and filters out the irrelevant ones:
+
+```json
+{ "categories": [] }
+```
+
+**2. By category** — list the category slugs and the bot will poll exactly those:
+
+```json
+{ "categories": ["saity", "programmirovanie", "messengers", "avtomatizaciya-biznesa"] }
+```
+
+Slugs are visible in FL.ru URLs: `fl.ru/projects/category/<slug>/`. Available slugs include:
+
+`saity` · `programmirovanie` · `internet-magaziny` · `messengers` · `avtomatizaciya-biznesa` · `ai-iskusstvenniy-intellekt` · `mobile` · `brauzery` · `dizajn` · `prodvizhenie-saitov-seo` · `reklama-marketing` · `teksty` · `audio-video-photo` · `games` · `crypto-i-blockchain` · `inzheniring` · `konsalting` · `marketplace-management` · `socialnye-seti` · `firmennyi-stil` · `3d-grafika` · `animaciya` · `risunki-i-illustracii`
+
+Which one to pick depends on how broad your specialisation is: for a narrow profile (say, bots and scraping only) the category mode produces noticeably less noise in notifications than the general feed.
 
 ---
 
@@ -113,6 +135,7 @@ FL.ru  ──HTTP──>  fl/cli.ts ──> filters ──> fl-heartbeat ──>
 | `llm.apiKey` | string | — | Provider API key |
 | `polling.intervalMs` | number | `60000` | Poll interval, ms |
 | `specialties` | string[] | `[]` | Agent specialties, feed the system prompt |
+| `categories` | string[] | `[]` | FL.ru categories to collect from (slug from `/projects/category/<slug>/`). Empty — general feed |
 | `autoQuote` / `autoWork` | bool | `true` / `true` | Automatic quoting and task execution |
 | `declineKeywords` | string[] | `[]` | Jobs containing these words are skipped |
 | `learningEnabled` | bool | `true` | Enable self-learning |

@@ -183,23 +183,37 @@ export async function getAvailableTasks(
   try {
     const cats = config?.categories || [];
 
-    // Строим URL
-    let url = "https://www.fl.ru/projects/";
-    if (cats.length > 0) {
-      // Если есть категории — добавляем первую
-      url = `https://www.fl.ru/projects/category/${encodeURIComponent(cats[0])}/`;
-    }
+    // Два режима сбора (на выбор пользователя):
+    //  • categories заданы — собираем из этих категорий;
+    //  • categories пусто — общая лента (поведение по умолчанию).
+    const urls = cats.length > 0
+      ? cats.map((c) => `https://www.fl.ru/projects/category/${encodeURIComponent(c)}/`)
+      : ["https://www.fl.ru/projects/"];
 
-    console.log(`[FL.ru] Запрашиваю ${url}`);
-    const html = await fetchWithDelay(url);
-    const allTasks = parseProjectsList(html, url);
+    const seen = new Set<string>();
+    const allTasks: FlTask[] = [];
+    let hasMore = false;
+
+    for (const url of urls) {
+      console.log(`[FL.ru] Запрашиваю ${url}`);
+      const html = await fetchWithDelay(url);
+      const pageTasks = parseProjectsList(html, url);
+
+      for (const t of pageTasks) {
+        if (seen.has(t.id)) continue;
+        seen.add(t.id);
+        allTasks.push(t);
+      }
+
+      // Проверяем, есть ли следующая страница
+      const $ = cheerio.load(html);
+      if ($('a[rel="next"], a:contains("Следующая")').length > 0) hasMore = true;
+
+      console.log(`[FL.ru] ${url} → ${pageTasks.length} заказов (уникальных всего: ${allTasks.length})`);
+    }
 
     // Фильтруем
     const tasks = allTasks.filter((t) => applyFilters(t, config));
-
-    // Проверяем, есть ли следующая страница
-    const $ = cheerio.load(html);
-    const hasMore = $('a[rel="next"], a:contains("Следующая")').length > 0;
 
     console.log(`[FL.ru] Получено ${allTasks.length} заказов, после фильтра: ${tasks.length}`);
 

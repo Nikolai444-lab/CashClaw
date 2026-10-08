@@ -60,7 +60,7 @@ export async function startAgent(): Promise<http.Server> {
     } else if (ctx.config.marketplace === "fl") {
       ctx.heartbeat = createFlHeartbeat(
         {
-          categories: [],
+          categories: ctx.config.categories || [],
           minBudget: 0,
           maxBudget: 0,
           keywords: ctx.config.specialties || [],
@@ -738,7 +738,7 @@ async function handleMarketplaceSwitch(
     } else if (newMarketplace === "fl") {
       ctx.heartbeat = createFlHeartbeat(
         {
-          categories: [],
+          categories: ctx.config.categories || [],
           minBudget: 0,
           maxBudget: 0,
           keywords: ctx.config.specialties || [],
