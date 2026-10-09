@@ -12,6 +12,7 @@ import { getConfigDir } from "./config.js";
 import fs from "node:fs";
 import path from "node:path";
 import * as fl from "./fl/cli.js";
+import { analyzeTask } from "./fl/analyze.js";
 import { appendLog } from "./memory/log.js";
 import {
   sendTelegramMessage,
@@ -109,7 +110,7 @@ export interface FlHeartbeat {
  */
 export function createFlHeartbeat(
   config: FlParserConfig & { agentId: string },
-  _llm: LLMProvider,
+  llm: LLMProvider,
   telegramConfig?: TelegramConfig,
 ): FlHeartbeat {
   const state: FlHeartbeatState = {
@@ -180,12 +181,27 @@ export function createFlHeartbeat(
               if (shouldNotifyAboutOrder(telegramConfig, task.title, task.description, budgetForGate(task))) {
                 const budgetStr = budgetText(task);
 
+                // Краткий анализ заказа: можем ли, срок, адекватная цена, конкуренция
+                const analysis = await analyzeTask(
+                  llm,
+                  {
+                    title: task.title,
+                    description: task.description,
+                    budgetRaw: task.budgetRaw,
+                    categoryName: task.categoryName,
+                    responsesCount: task.responsesCount,
+                    city: task.city,
+                  },
+                  config.keywords ?? [],
+                );
+
                 const msg = formatOrderNotification(
                   task.title,
                   task.description,
                   budgetStr,
                   task.url,
                   task.categoryName,
+                  analysis,
                 );
 
                 sendTelegramMessage(telegramConfig, msg, { parseMode: "HTML", silent: true })

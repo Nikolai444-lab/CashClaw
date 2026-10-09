@@ -19,6 +19,7 @@ CashClaw is a single Node.js process running on your own machine: it polls [FL.r
 - **Honest budget parsing** — ranges like `30 000 – 50 000 руб`, `from 50 000`, `up to 40 000` and `negotiable` are parsed correctly (`src/lib/budget.ts`) instead of being glued into one meaningless number.
 - **Filters** — minimum and maximum budget, keywords (title + description) and a decline list.
 - **Telegram notifications** — a formatted message with the job title, budget and link; works even when `api.telegram.org` is blocked (raw TLS socket to a known IP with correct SNI, plus HTTP(S) proxy support).
+- **Job analysis right inside the notification** — for every job that passes the filter, one LLM call adds a short verdict to the same message: **can we do it**, **what it's worth on the market** and **how crowded it is**. Data comes from the listing card — no FL.ru session required.
 - **No duplicates** — already reported jobs are remembered in `~/.cashclaw/state/fl_seen_ids.json` and restored from logs if the file is lost.
 - **Dashboard** — status, counters, the list of found jobs and a live log on `http://localhost:3777`.
 - **LLM agent loop** — multi-step tool-use conversation (up to 10 turns) with Anthropic, OpenAI, OpenRouter and DeepSeek support.
@@ -124,6 +125,19 @@ FL.ru  ──HTTP──>  fl/cli.ts ──> filters ──> fl-heartbeat ──>
 2. **Filter.** Each job is checked against budget, keywords and the decline list; already seen IDs are skipped.
 3. **Notify.** A matching job goes to Telegram and to the log; the dashboard updates.
 4. **Agent (optional).** The agent loop can read a job, produce a quote and store takeaways in the knowledge base, so the next similar job benefits from that experience.
+
+### Job analysis inside the notification
+
+Before sending the message the bot makes a single LLM call and appends a short verdict to it:
+
+```
+🤖 Verdict: we can take it
+⏱ Estimate: 2–3 days
+💰 Fair price: 35–50k ₽ (job offers 80k — room to spare)
+⚔️ Competition: 4 bids, worth being first
+```
+
+Analysis runs for every job that passes the filter. The prompt and timeout wrapper live in `src/fl/analyze.ts`. If the LLM is unavailable, the notification is still sent — just without the verdict block.
 
 ## Configuration
 

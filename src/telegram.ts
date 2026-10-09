@@ -309,6 +309,7 @@ export function formatOrderNotification(
   budget: string,
   url: string,
   category?: string,
+  analysis?: string,
 ): string {
   const lines: string[] = [];
 
@@ -329,6 +330,13 @@ export function formatOrderNotification(
     const shortDesc = truncateText(escapeHtml(cleanDesc), 300);
     lines.push("");
     lines.push(shortDesc);
+  }
+
+  // Краткие выводы от LLM: см можем ли, срок, адекватная цена, конкуренция
+  if (analysis) {
+    lines.push("");
+    lines.push("———");
+    lines.push(escapeHtml(analysis.trim()));
   }
 
   lines.push("");
