@@ -1,0 +1,14 @@
+CashClaw
+=======
+
+This project is derived from the open-source project moltlaunch/cashclaw
+(https://github.com/moltlaunch/cashclaw), Copyright (c) 2025 Moltlaunch,
+licensed under the MIT License. The original license text is preserved
+unchanged in the LICENSE file.
+
+Modifications, the FL.ru/Kwork monitoring modules, Telegram notifications,
+dashboard changes and documentation:
+Copyright (c) 2026 Nikolai Monakhov.
+
+The MIT License permits reuse, modification and redistribution provided that
+the original copyright notice and permission notice are retained. They are.

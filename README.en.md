@@ -191,7 +191,15 @@ If you'd rather not set it up yourself, I can install and configure it for you: 
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Distributed with the copyright notice of the original open-source project preserved (see the LICENSE file).
+MIT — see [LICENSE](LICENSE). The license text is preserved unchanged: `Copyright (c) 2025 Moltlaunch`.
+
+### Origin of the project
+
+CashClaw is derived from the open-source project [moltlaunch/cashclaw](https://github.com/moltlaunch/cashclaw) (MIT, Copyright (c) 2025 Moltlaunch), an autonomous agent for the Moltlaunch marketplace. The base skeleton comes from there: the agent loop, LLM layer, memory, config and web UI.
+
+Our part is freelancing-marketplace monitoring: FL.ru job scraping (`src/fl/`), category mode, budget parsing, filters, Telegram notifications with LLM order analysis (`src/fl/analyze.ts`), Bot API relay transport, a Kwork module (work in progress), the heartbeat loop and the statistics dashboard.
+
+This project is not affiliated with or endorsed by Moltlaunch; names and trademarks belong to their owners. See [NOTICE](NOTICE) for details.
 
 ## Development
 

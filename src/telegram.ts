@@ -11,6 +11,7 @@
 
 import tls from "node:tls";
 import net from "node:net";
+import https from "node:https";
 import type { TelegramConfig } from "./config.js";
 
 /** Базовая ссылка Bot API для отправки сообщений */
@@ -76,6 +77,62 @@ export async function sendTelegramMessage(
 }
 
 /**
+ * Отправка через релей Bot API (config.apiRoot) — обычный HTTPS POST.
+ * Релей ожидает путь /bot<token>/<method>, как и сам Telegram.
+ */
+function trySendViaApiRoot(config: TelegramConfig, body: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const base = String(config.apiRoot).replace(/\/+$/, "");
+    let target: URL;
+    try {
+      target = new URL(`${base}/bot${config.botToken}/sendMessage`);
+    } catch {
+      reject(new Error(`Invalid apiRoot: ${base}`));
+      return;
+    }
+
+    const req = https.request(
+      {
+        hostname: target.hostname,
+        port: target.port ? Number(target.port) : 443,
+        path: target.pathname + target.search,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+          Connection: "close",
+        },
+        timeout: TIMEOUT_MS,
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk: Buffer) => {
+          data += chunk.toString();
+        });
+        res.on("end", () => {
+          try {
+            const result = JSON.parse(data) as TelegramResponse;
+            if (result.ok) resolve(true);
+            else {
+              console.warn(`[Telegram] ❌ Ошибка API: ${result.description || "unknown"}`);
+              resolve(false);
+            }
+          } catch {
+            reject(new Error(`Invalid JSON: ${data.substring(0, 100)}`));
+          }
+        });
+      },
+    );
+
+    req.on("timeout", () => {
+      req.destroy(new Error("Request timeout"));
+    });
+    req.on("error", (err: Error) => reject(err));
+    req.end(body);
+  });
+}
+
+/**
  * Отправка запроса через TLS-сокет.
  * Если задан config.proxy (HTTP-прокси), сначала устанавливаем CONNECT-туннель
  * к api.telegram.org через прокси, затем поверх него TLS.
@@ -107,6 +164,13 @@ function trySendViaTls(
       "",
       body,
     ].join("\r\n");
+
+    // Если задан apiRoot (наш релей Bot API) — идём обычным HTTPS POST,
+    // не трогая прокси и прямой IP. verified 15.10.2026.
+    if (config.apiRoot) {
+      void trySendViaApiRoot(config, body).then(resolve, reject);
+      return;
+    }
 
     let timedOut = false;
     let rawSocket: net.Socket | null = null;

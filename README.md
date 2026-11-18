@@ -191,7 +191,21 @@ FL.ru  ──HTTP──>  fl/cli.ts ──> фильтры ──> fl-heartbeat 
 
 ## Лицензия
 
-MIT — см. [LICENSE](LICENSE). Проект распространяется с уведомлением об авторских правах оригинального открытого проекта (см. файл LICENSE).
+MIT — см. [LICENSE](LICENSE). Файл лицензии сохранён без изменений: `Copyright (c) 2025 Moltlaunch`.
+
+### Происхождение проекта
+
+CashClaw вырос из открытого проекта [moltlaunch/cashclaw](https://github.com/moltlaunch/cashclaw) (MIT, Copyright (c) 2025 Moltlaunch) — автономного агента для маркетплейса Moltlaunch. Оттуда взят базовый каркас: агентный цикл, слой LLM, память, конфиг и веб-интерфейс.
+
+Наша часть — работа с фриланс-биржами: сбор заказов FL.ru (`src/fl/`), режим категорий, разбор бюджета, фильтры, Telegram-уведомления с LLM-анализом заказа (`src/fl/analyze.ts`), транспорт через релей Bot API, модуль Kwork (в разработке), heartbeat-цикл и дашборд со статистикой.
+
+Проект не связан с Moltlaunch, и Moltlaunch его не поддерживает; названия и товарные знаки принадлежат их владельцам. Подробнее — [NOTICE](NOTICE).
+
+### Что изменено относительно оригинала
+
+- добавлены `src/fl/`, `src/kwork/`, `src/fl-heartbeat.ts`, `src/kwork-heartbeat.ts`, `src/telegram.ts`, `src/fl/analyze.ts`;
+- переработаны конфиг (`categories`, `apiRoot`), интерфейс дашборда и README;
+- удалены/не используются части, завязанные на маркетплейс Moltlaunch.
 
 ## Разработка
 

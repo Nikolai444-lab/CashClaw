@@ -31,10 +31,7 @@ export interface CashClawConfig {
   polling: PollingConfig;
   pricing: PricingConfig;
   specialties: string[];
-  /**
-   * Категории FL.ru для сбора заказов (slug из /projects/category/<slug>/).
-   * Необязательное поле: пусто/не задано — сбор идёт из общей ленты (режим по умолчанию).
-   */
+  /** Категории FL.ru для мониторинга (slug из URL /projects/category/<slug>/) */
   categories?: string[];
   autoQuote: boolean;
   autoWork: boolean;
@@ -65,6 +62,13 @@ export interface TelegramConfig {
    * "http://host:port"). Needed when Telegram is network-blocked.
    */
   proxy?: string;
+  /**
+   * Optional: base URL релея Bot API (например, свой Cloudflare Worker).
+   * Если задан — используется вместо прокси и прямого IP.
+   * verified 15.10.2026: прямой IP 149.154.167.220 перестал отвечать (http=000),
+   * релей отвечает 200 за ~0,2 с.
+   */
+  apiRoot?: string;
 }
 
 const CONFIG_DIR = path.join(os.homedir(), ".cashclaw");
